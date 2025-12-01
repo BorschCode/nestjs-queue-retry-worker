@@ -1,5 +1,6 @@
 # Message Queue Processing Service (Recommended Approach)
 
+[![Tests](https://github.com/BorschCode/nestjs-queue-retry-worker/workflows/Tests/badge.svg)](https://github.com/USERNAME/nestjs-queue-retry-worker/actions)
 [![NestJS](https://img.shields.io/badge/NestJS-Framework-red.svg)]()
 [![Docker Image](https://img.shields.io/badge/Docker-ready-blue?logo=docker)]()
 [![Node.js CI](https://img.shields.io/badge/node-18+-brightgreen.svg)]()
