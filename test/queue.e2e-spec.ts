@@ -21,9 +21,23 @@ describe('Queue Integration Tests (e2e)', () => {
     messageQueueService = moduleFixture.get<MessageQueueService>(
       MessageQueueService,
     );
+
+    // Clean up queues before starting tests
+    const mainQueue = messageQueueService['messageQueue'];
+    const deadLetterQueue = messageQueueService['deadLetterQueue'];
+
+    await mainQueue.obliterate({ force: true });
+    await deadLetterQueue.obliterate({ force: true });
   });
 
   afterAll(async () => {
+    // Clean up queues after tests
+    const mainQueue = messageQueueService['messageQueue'];
+    const deadLetterQueue = messageQueueService['deadLetterQueue'];
+
+    await mainQueue.obliterate({ force: true });
+    await deadLetterQueue.obliterate({ force: true });
+
     await app.close();
   });
 

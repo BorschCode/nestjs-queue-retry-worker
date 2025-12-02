@@ -26,19 +26,40 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
     deliveryChannelFactory = moduleFixture.get<DeliveryChannelFactory>(
       DeliveryChannelFactory,
     );
+
+    // Clean up queues before starting tests
+    const mainQueue = messageQueueService['messageQueue'];
+    const deadLetterQueue = messageQueueService['deadLetterQueue'];
+
+    await mainQueue.obliterate({ force: true });
+    await deadLetterQueue.obliterate({ force: true });
   });
 
   afterAll(async () => {
+    // Clean up queues and ensure no pending jobs
+    const mainQueue = messageQueueService['messageQueue'];
+    const deadLetterQueue = messageQueueService['deadLetterQueue'];
+
+    // Remove all jobs in all states
+    await mainQueue.obliterate({ force: true });
+    await deadLetterQueue.obliterate({ force: true });
+
     await app.close();
   });
 
   describe('Dead-Letter Transitions', () => {
+    let deliverSpy: jest.SpyInstance;
+
+    afterEach(() => {
+      // Ensure mock is restored after each test
+      if (deliverSpy) {
+        deliverSpy.mockRestore();
+      }
+    });
+
     it('should move message to dead-letter queue after max retries', async () => {
       // Mock the delivery to always fail
-      const originalDeliver = deliveryChannelFactory.deliver.bind(
-        deliveryChannelFactory,
-      );
-      jest
+      deliverSpy = jest
         .spyOn(deliveryChannelFactory, 'deliver')
         .mockRejectedValue(new Error('Simulated delivery failure'));
 
@@ -49,7 +70,7 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
         data: { test: 'data' },
       };
 
-      const job = await messageQueueService.addMessage(message);
+      await messageQueueService.addMessage(message);
 
       // Wait for all retries to complete and move to dead-letter
       // This will take some time due to exponential backoff
@@ -65,10 +86,6 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
       expect(movedJob).toBeDefined();
       expect(movedJob?.data.attemptCount).toBe(QUEUE_CONFIG.MAX_RETRY_ATTEMPTS);
       expect(movedJob?.data.lastError).toContain('Simulated delivery failure');
-
-      // Restore original method
-      jest.spyOn(deliveryChannelFactory, 'deliver').mockRestore();
-      deliveryChannelFactory.deliver = originalDeliver;
     }, 60000);
 
     it('should retrieve dead-letter queue jobs via API', async () => {
@@ -86,12 +103,20 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
       if (deadLetterJobs.length > 0) {
         const jobId = deadLetterJobs[0].id;
 
+        // Mock delivery to succeed this time to avoid long retries
+        deliverSpy = jest
+          .spyOn(deliveryChannelFactory, 'deliver')
+          .mockResolvedValue(undefined);
+
         const response = await request(app.getHttpServer())
           .post(`/admin/queue/requeue/${jobId}`)
           .expect(201);
 
         expect(response.body.success).toBe(true);
         expect(response.body.message).toContain('requeued successfully');
+
+        // Wait for the requeued job to be processed
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }, 30000);
   });
