@@ -1,0 +1,66 @@
+### Test HTTP Webhook Message
+POST http://localhost:3000/admin/queue/message
+Content-Type: application/json
+
+{
+  "id": "msg-001",
+  "channel": "http",
+  "destination": "https://webhook.site/your-unique-id",
+  "data": {
+    "orderId": "12345",
+    "status": "completed"
+  },
+  "metadata": {
+    "source": "order-service",
+    "timestamp": "2025-12-02T12:00:00Z"
+  }
+}
+
+### Test Email Message
+POST http://localhost:3000/admin/queue/message
+Content-Type: application/json
+
+{
+  "id": "msg-002",
+  "channel": "email",
+  "destination": "test@example.com",
+  "data": {
+    "from": "noreply@example.com",
+    "subject": "Order Confirmation",
+    "text": "Your order has been confirmed!",
+    "html": "<h1>Your order has been confirmed!</h1>"
+  }
+}
+
+### Test Internal Service Message
+POST http://localhost:3000/admin/queue/message
+Content-Type: application/json
+
+{
+  "id": "msg-003",
+  "channel": "internal",
+  "destination": "inventory-service",
+  "data": {
+    "action": "update-stock",
+    "productId": "prod-123",
+    "quantity": 10
+  }
+}
+
+### Get Queue Statistics
+GET http://localhost:3000/admin/queue/stats
+
+### Get Waiting Jobs
+GET http://localhost:3000/admin/queue/jobs?state=waiting&start=0&end=10
+
+### Get Failed Jobs
+GET http://localhost:3000/admin/queue/jobs?state=failed&start=0&end=10
+
+### Get Dead-Letter Queue Jobs
+GET http://localhost:3000/admin/queue/dead-letter?start=0&end=10
+
+### Get Job by ID
+GET http://localhost:3000/admin/queue/jobs/1
+
+### Requeue Failed Job from Dead-Letter
+POST http://localhost:3000/admin/queue/requeue/1
