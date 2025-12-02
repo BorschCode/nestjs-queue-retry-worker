@@ -16,6 +16,7 @@ describe('Queue Integration Tests (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.enableShutdownHooks();
     await app.init();
 
     messageQueueService = moduleFixture.get<MessageQueueService>(
@@ -42,13 +43,15 @@ describe('Queue Integration Tests (e2e)', () => {
     await mainQueue.close();
     await deadLetterQueue.close();
 
+    // Close app and wait for shutdown
     await app.close();
+    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 
   describe('Message Queue Processing', () => {
     it('should add a message to the queue via API', async () => {
       const message: MessagePayload = {
-        id: 'e2e-test-1',
+        id: `e2e-test-${Date.now()}`,  // Unique ID
         channel: 'internal',
         destination: 'test-service',
         data: { test: 'data' },
@@ -88,7 +91,7 @@ describe('Queue Integration Tests (e2e)', () => {
   describe('Queue Service Direct Tests', () => {
     it('should process internal service message successfully', async () => {
       const message: MessagePayload = {
-        id: 'direct-test-1',
+        id: `direct-test-${Date.now()}`,  // Unique ID
         channel: 'internal',
         destination: 'test-service',
         data: { action: 'process' },
