@@ -44,6 +44,10 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
     await mainQueue.obliterate({ force: true });
     await deadLetterQueue.obliterate({ force: true });
 
+    // Close queue connections
+    await mainQueue.close();
+    await deadLetterQueue.close();
+
     await app.close();
   });
 

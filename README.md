@@ -53,7 +53,7 @@ The application will be available at: **http://localhost:3000**
 - `GET /admin/queue/dead-letter` - List dead-letter queue jobs
 - `POST /admin/queue/requeue/:jobId` - Requeue a failed message
 
-See [API Documentation](./API_DOCUMENTATION.md) for detailed endpoint information.
+See [API Documentation](docs/API_DOCUMENTATION.md) for detailed endpoint information.
 
 ---
 
