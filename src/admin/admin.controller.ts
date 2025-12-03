@@ -2,14 +2,12 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
   Query,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { MessageQueueService } from '../queue/services/message-queue.service';
-import { MessagePayload } from '../queue/interfaces/message-payload.interface';
 
 @Controller('admin/queue')
 export class AdminController {
@@ -84,23 +82,6 @@ export class AdminController {
     } catch (error) {
       throw new HttpException(
         error.message || 'Failed to requeue job',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  @Post('message')
-  async addMessage(@Body() message: MessagePayload) {
-    try {
-      const job = await this.messageQueueService.addMessage(message);
-      return {
-        success: true,
-        jobId: job.id,
-        message: 'Message added to queue successfully',
-      };
-    } catch (error) {
-      throw new HttpException(
-        error.message || 'Failed to add message to queue',
         HttpStatus.BAD_REQUEST,
       );
     }
