@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { QueueModule } from './queue/queue.module';
-import { AdminController } from './admin/admin.controller';
+import { QueueModule } from './api/queue/queue.module';
+import { AdminController } from './api/admin/admin.controller';
 import { loggerConfig } from './config/logger.config';
 
 @Module({

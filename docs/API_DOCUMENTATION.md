@@ -4,19 +4,31 @@
 
 This service provides a message queue processing system with retry logic, exponential backoff, and dead-letter queue handling.
 
+## Interactive Documentation
+
+**Swagger/OpenAPI UI**: [http://localhost:3011/api/docs](http://localhost:3011/api/docs)
+
+The complete API documentation with interactive testing is available via Swagger UI. This includes:
+- Request/response schemas
+- Parameter validation
+- Live API testing
+- Authentication details
+
 ## Base URL
 
 ```
 http://localhost:3011
 ```
 
-## Endpoints
+## Quick Reference
 
-### 1. Add Message to Queue
+### Queue Operations
+
+#### 1. Add Message to Queue
 
 Add a new message to the processing queue.
 
-**Endpoint:** `POST /api/admin/queue/message`
+**Endpoint:** `POST /api/queue/message`
 
 **Request Body:**
 
@@ -89,7 +101,9 @@ Add a new message to the processing queue.
 
 ---
 
-### 2. Get Queue Statistics
+### Admin & Monitoring Operations
+
+#### 2. Get Queue Statistics
 
 Retrieve statistics for both main and dead-letter queues.
 
@@ -116,7 +130,7 @@ Retrieve statistics for both main and dead-letter queues.
 
 ---
 
-### 3. Get Jobs
+#### 3. Get Jobs
 
 Retrieve jobs by state with pagination.
 
@@ -156,7 +170,7 @@ Retrieve jobs by state with pagination.
 
 ---
 
-### 4. Get Dead-Letter Queue Jobs
+#### 4. Get Dead-Letter Queue Jobs
 
 Retrieve jobs from the dead-letter queue.
 
@@ -190,11 +204,11 @@ Retrieve jobs from the dead-letter queue.
 
 ---
 
-### 5. Get Job by ID
+#### 5. Get Job by ID
 
 Retrieve detailed information about a specific job.
 
-**Endpoint:** `GET /api/admin/queue/jobs/:jobId`
+**Endpoint:** `GET /api/admin/queue/jobs/{jobId}`
 
 **Response:**
 
@@ -216,11 +230,11 @@ Retrieve detailed information about a specific job.
 
 ---
 
-### 6. Requeue Failed Job
+#### 6. Requeue Failed Job
 
 Move a job from the dead-letter queue back to the main queue for reprocessing.
 
-**Endpoint:** `POST /api/admin/queue/requeue/:jobId`
+**Endpoint:** `POST /api/admin/queue/requeue/{jobId}`
 
 **Response:**
 
@@ -305,7 +319,7 @@ The application runs with the following services:
 
 ```bash
 # Add a message
-curl -X POST http://localhost:3011/api/admin/queue/message \
+curl -X POST http://localhost:3011/api/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "test-001",

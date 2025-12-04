@@ -1,0 +1,351 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/admin/queue/stats": {
+      "get": {
+        "operationId": "AdminController_getQueueStats",
+        "summary": "Get queue statistics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Queue statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "waiting": 5,
+                    "active": 2,
+                    "completed": 100,
+                    "failed": 3,
+                    "delayed": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/queue/jobs": {
+      "get": {
+        "operationId": "AdminController_getJobs",
+        "summary": "Get jobs by state",
+        "parameters": [
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "description": "Job state to filter by",
+            "schema": {
+              "enum": [
+                "waiting",
+                "active",
+                "completed",
+                "failed",
+                "delayed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "required": false,
+            "in": "query",
+            "description": "End index for pagination",
+            "schema": {
+              "example": 10
+            }
+          },
+          {
+            "name": "start",
+            "required": false,
+            "in": "query",
+            "description": "Start index for pagination",
+            "schema": {
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Jobs retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": "12345",
+                      "name": "processMessage",
+                      "data": {
+                        "message": "Hello"
+                      },
+                      "attemptsMade": 1,
+                      "processedOn": 1234567890,
+                      "finishedOn": 1234567900,
+                      "failedReason": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/queue/dead-letter": {
+      "get": {
+        "operationId": "AdminController_getDeadLetterJobs",
+        "summary": "Get jobs in the dead letter queue",
+        "parameters": [
+          {
+            "name": "end",
+            "required": false,
+            "in": "query",
+            "description": "End index for pagination",
+            "schema": {
+              "example": 10
+            }
+          },
+          {
+            "name": "start",
+            "required": false,
+            "in": "query",
+            "description": "Start index for pagination",
+            "schema": {
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dead letter jobs retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": "12345",
+                      "name": "processMessage",
+                      "data": {
+                        "message": "Failed message"
+                      },
+                      "attemptsMade": 5,
+                      "timestamp": 1234567890
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/queue/jobs/{jobId}": {
+      "get": {
+        "operationId": "AdminController_getJobById",
+        "summary": "Get job details by ID",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "description": "Job ID",
+            "schema": {
+              "example": "12345",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": "12345",
+                    "name": "processMessage",
+                    "data": {
+                      "message": "Hello"
+                    },
+                    "attemptsMade": 2,
+                    "processedOn": 1234567890,
+                    "finishedOn": 1234567900,
+                    "failedReason": "Network error",
+                    "stacktrace": [
+                      "Error: Network error",
+                      "  at processMessage..."
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/queue/requeue/{jobId}": {
+      "post": {
+        "operationId": "AdminController_requeueFromDeadLetter",
+        "summary": "Requeue a job from the dead letter queue",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "description": "Job ID to requeue",
+            "schema": {
+              "example": "12345",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Job requeued successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "message": "Job 12345 requeued successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed to requeue job"
+          }
+        },
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/queue/message": {
+      "post": {
+        "operationId": "QueueController_addMessage",
+        "summary": "Add a message to the queue",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessagePayloadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Message successfully added to queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "jobId": "12345",
+                    "message": "Message added to queue successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid message format"
+          }
+        },
+        "tags": [
+          "queue"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "NestJS Queue Retry Worker API",
+    "description": "API for managing message queues with retry logic and dead letter handling",
+    "version": "1.0",
+    "contact": {
+
+    }
+  },
+  "tags": [
+    {
+      "name": "queue",
+      "description": "Queue operations"
+    },
+    {
+      "name": "admin",
+      "description": "Admin and monitoring operations"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "MessagePayloadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the message",
+            "example": "msg_123456"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Delivery channel for the message",
+            "enum": [
+              "http",
+              "email",
+              "internal"
+            ],
+            "example": "http"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Destination URL, email address, or internal identifier",
+            "example": "https://api.example.com/webhook"
+          },
+          "data": {
+            "type": "object",
+            "description": "Message payload data",
+            "example": {
+              "message": "Hello, World!",
+              "priority": "high"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata for the message",
+            "example": {
+              "userId": "12345",
+              "correlationId": "abc-123"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "channel",
+          "destination",
+          "data"
+        ]
+      }
+    }
+  }
+}
