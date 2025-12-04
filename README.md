@@ -43,17 +43,27 @@ docker compose logs -f app
 docker compose down
 ```
 
-The application will be available at: **http://localhost:3000**
+The application will be available at: **http://localhost:3011**
 
-### API Endpoints
+### API Documentation
 
-- `POST /admin/queue/message` - Add a message to the queue
-- `GET /admin/queue/stats` - Get queue statistics
-- `GET /admin/queue/jobs` - List jobs by state
-- `GET /admin/queue/dead-letter` - List dead-letter queue jobs
-- `POST /admin/queue/requeue/:jobId` - Requeue a failed message
+Interactive API documentation is available via Swagger/OpenAPI at:
+**http://localhost:3011/api/docs**
 
-See [API Documentation](docs/API_DOCUMENTATION.md) for detailed endpoint information.
+**OpenAPI Specification:**
+- **JSON Format**: http://localhost:3011/api/docs-json
+- **Swagger UI**: http://localhost:3011/api/docs
+- **GitHub Pages**: [Static API Documentation](https://username.github.io/nestjs-queue-retry-worker/swagger.html)
+
+**Quick Reference:**
+- **Queue Operations**: `POST /api/queue/message`
+- **Admin Operations**: `GET /api/admin/queue/*`
+
+See the [Swagger UI](http://localhost:3011/api/docs) for complete endpoint details, request/response schemas, and interactive testing.
+
+![Home Page](docs/home-page.png)
+
+**Note**: Replace `username` in the GitHub Pages URL with your actual GitHub username to access the static documentation.
 
 ---
 
@@ -99,34 +109,61 @@ Message → Main Queue → Processor → Delivery Channel
 
 ## Project Structure
 
+### Layer-based Architecture
+
+This project follows a **layer-based (API-first)** architecture that organizes code by API domains and functionality:
+
 ```
 src/
-├── admin/
-│   └── admin.controller.ts          # Queue management endpoints
+├── api/
+│   ├── queue/
+│   │   ├── channels/                 # Delivery channel implementations
+│   │   │   ├── base-delivery.channel.ts
+│   │   │   ├── http-webhook.channel.ts
+│   │   │   ├── email.channel.ts
+│   │   │   ├── internal-service.channel.ts
+│   │   │   └── delivery-channel.factory.ts
+│   │   ├── config/
+│   │   │   └── queue.config.ts       # Queue and retry configuration
+│   │   ├── dto/                      # Data Transfer Objects
+│   │   ├── interfaces/               # TypeScript interfaces
+│   │   │   ├── message-payload.interface.ts
+│   │   │   ├── delivery-channel.interface.ts
+│   │   │   └── job-data.interface.ts
+│   │   ├── processors/               # BullMQ job processors
+│   │   │   ├── message.processor.ts
+│   │   │   └── dead-letter.processor.ts
+│   │   ├── services/
+│   │   │   └── message-queue.service.ts  # Queue management service
+│   │   ├── queue.controller.ts       # Queue API endpoints
+│   │   └── queue.module.ts
+│   └── admin/
+│       └── admin.controller.ts       # Admin & monitoring endpoints
 ├── config/
 │   └── logger.config.ts              # Winston logger configuration
-├── queue/
-│   ├── channels/                     # Delivery channel implementations
-│   │   ├── base-delivery.channel.ts
-│   │   ├── http-webhook.channel.ts
-│   │   ├── email.channel.ts
-│   │   ├── internal-service.channel.ts
-│   │   └── delivery-channel.factory.ts
-│   ├── config/
-│   │   └── queue.config.ts           # Queue and retry configuration
-│   ├── interfaces/                   # TypeScript interfaces
-│   │   ├── message-payload.interface.ts
-│   │   ├── delivery-channel.interface.ts
-│   │   └── job-data.interface.ts
-│   ├── processors/                   # BullMQ job processors
-│   │   ├── message.processor.ts
-│   │   └── dead-letter.processor.ts
-│   ├── services/
-│   │   └── message-queue.service.ts  # Queue management service
-│   └── queue.module.ts
+├── app.controller.ts                 # Home page (no API prefix)
 ├── app.module.ts
+├── app.service.ts
 └── main.ts
 ```
+
+### API Endpoint Structure
+
+- **Queue Operations**: `/api/queue/message`
+- **Admin Operations**: `/api/admin/queue/*`
+- **Home Page**: `/` (no prefix)
+
+This structure provides clear separation of concerns and makes the codebase more maintainable and scalable.
+
+---
+
+## Architecture Benefits
+
+- **Domain Separation**: Clear boundaries between queue operations and admin functions
+- **Scalability**: Easy to add new API domains under `/api/`
+- **Maintainability**: Related functionality grouped together
+- **Testing**: Isolated modules for better unit testing
+- **API Versioning**: Future versions can be added as `/api/v2/`
 
 ---
 
@@ -187,7 +224,7 @@ SMTP_PORT=1025
 ### Send HTTP Webhook Message
 
 ```bash
-curl -X POST http://localhost:3000/admin/queue/message \
+curl -X POST http://localhost:3011/api/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "msg-001",
@@ -203,7 +240,7 @@ curl -X POST http://localhost:3000/admin/queue/message \
 ### Send Email Message
 
 ```bash
-curl -X POST http://localhost:3000/admin/queue/message \
+curl -X POST http://localhost:3011/api/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "msg-002",
@@ -223,13 +260,13 @@ View emails at: **http://localhost:8025** (Mailpit web UI)
 ### Check Queue Statistics
 
 ```bash
-curl http://localhost:3000/admin/queue/stats
+curl http://localhost:3011/api/admin/queue/stats
 ```
 
 ### View Failed Jobs
 
 ```bash
-curl "http://localhost:3000/admin/queue/jobs?state=failed"
+curl "http://localhost:3011/api/admin/queue/jobs?state=failed"
 ```
 
 ---
@@ -270,7 +307,7 @@ Example:
 
 | Service | Image | Port | Description |
 |---------|-------|------|-------------|
-| app | nestjs-app | 3000 | Main application |
+| app | nestjs-app | 3011 | Main application |
 | redis | redis:7-alpine | 6379 | Queue storage |
 | postgres | postgres:15 | 5432 | Database (future use) |
 | mailpit | axllent/mailpit | 8025 (web), 1025 (smtp) | Email testing |

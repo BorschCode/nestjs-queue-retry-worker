@@ -4,19 +4,31 @@
 
 This service provides a message queue processing system with retry logic, exponential backoff, and dead-letter queue handling.
 
+## Interactive Documentation
+
+**Swagger/OpenAPI UI**: [http://localhost:3011/api/docs](http://localhost:3011/api/docs)
+
+The complete API documentation with interactive testing is available via Swagger UI. This includes:
+- Request/response schemas
+- Parameter validation
+- Live API testing
+- Authentication details
+
 ## Base URL
 
 ```
-http://localhost:3000
+http://localhost:3011
 ```
 
-## Endpoints
+## Quick Reference
 
-### 1. Add Message to Queue
+### Queue Operations
+
+#### 1. Add Message to Queue
 
 Add a new message to the processing queue.
 
-**Endpoint:** `POST /admin/queue/message`
+**Endpoint:** `POST /api/queue/message`
 
 **Request Body:**
 
@@ -89,11 +101,13 @@ Add a new message to the processing queue.
 
 ---
 
-### 2. Get Queue Statistics
+### Admin & Monitoring Operations
+
+#### 2. Get Queue Statistics
 
 Retrieve statistics for both main and dead-letter queues.
 
-**Endpoint:** `GET /admin/queue/stats`
+**Endpoint:** `GET /api/admin/queue/stats`
 
 **Response:**
 
@@ -116,18 +130,18 @@ Retrieve statistics for both main and dead-letter queues.
 
 ---
 
-### 3. Get Jobs
+#### 3. Get Jobs
 
 Retrieve jobs by state with pagination.
 
-**Endpoint:** `GET /admin/queue/jobs`
+**Endpoint:** `GET /api/admin/queue/jobs`
 
 **Query Parameters:**
 - `state` (optional): `waiting`, `active`, `completed`, `failed`, `delayed` (default: `waiting`)
 - `start` (optional): Start index (default: 0)
 - `end` (optional): End index (default: 10)
 
-**Example:** `GET /admin/queue/jobs?state=failed&start=0&end=5`
+**Example:** `GET /api/admin/queue/jobs?state=failed&start=0&end=5`
 
 **Response:**
 
@@ -156,11 +170,11 @@ Retrieve jobs by state with pagination.
 
 ---
 
-### 4. Get Dead-Letter Queue Jobs
+#### 4. Get Dead-Letter Queue Jobs
 
 Retrieve jobs from the dead-letter queue.
 
-**Endpoint:** `GET /admin/queue/dead-letter`
+**Endpoint:** `GET /api/admin/queue/dead-letter`
 
 **Query Parameters:**
 - `start` (optional): Start index (default: 0)
@@ -190,11 +204,11 @@ Retrieve jobs from the dead-letter queue.
 
 ---
 
-### 5. Get Job by ID
+#### 5. Get Job by ID
 
 Retrieve detailed information about a specific job.
 
-**Endpoint:** `GET /admin/queue/jobs/:jobId`
+**Endpoint:** `GET /api/admin/queue/jobs/{jobId}`
 
 **Response:**
 
@@ -216,11 +230,11 @@ Retrieve detailed information about a specific job.
 
 ---
 
-### 6. Requeue Failed Job
+#### 6. Requeue Failed Job
 
 Move a job from the dead-letter queue back to the main queue for reprocessing.
 
-**Endpoint:** `POST /admin/queue/requeue/:jobId`
+**Endpoint:** `POST /api/admin/queue/requeue/{jobId}`
 
 **Response:**
 
@@ -292,7 +306,7 @@ Logs are stored in:
 
 The application runs with the following services:
 
-- **app**: NestJS application (port 3000)
+- **app**: NestJS application (port 3011)
 - **redis**: Redis for queue storage (port 6379)
 - **postgres**: PostgreSQL database (port 5432)
 - **mailpit**: Email testing service (web UI: port 8025, SMTP: port 1025)
@@ -305,7 +319,7 @@ The application runs with the following services:
 
 ```bash
 # Add a message
-curl -X POST http://localhost:3000/admin/queue/message \
+curl -X POST http://localhost:3011/api/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "test-001",
@@ -315,10 +329,10 @@ curl -X POST http://localhost:3000/admin/queue/message \
   }'
 
 # Get queue stats
-curl http://localhost:3000/admin/queue/stats
+curl http://localhost:3011/api/admin/queue/stats
 
 # Get failed jobs
-curl "http://localhost:3000/admin/queue/jobs?state=failed"
+curl "http://localhost:3011/api/admin/queue/jobs?state=failed"
 ```
 
 ### Using the provided HTTP file

@@ -6,6 +6,7 @@ import { QUEUE_CONFIG } from './config/queue.config';
 import { MessageQueueService } from './services/message-queue.service';
 import { MessageProcessor } from './processors/message.processor';
 import { DeadLetterProcessor } from './processors/dead-letter.processor';
+import { QueueController } from './queue.controller';
 import {
   HttpWebhookChannel,
   EmailChannel,
@@ -36,6 +37,7 @@ import {
       },
     ),
   ],
+  controllers: [QueueController],
   providers: [
     MessageQueueService,
     MessageProcessor,
