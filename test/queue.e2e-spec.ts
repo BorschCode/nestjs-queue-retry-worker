@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { MessageQueueService } from '../src/queue/services/message-queue.service';
-import { MessagePayload } from '../src/queue/interfaces/message-payload.interface';
-import { QUEUE_CONFIG } from '../src/queue/config/queue.config';
+import { MessageQueueService } from '../src/api/queue/services/message-queue.service';
+import { MessagePayload } from '../src/api/queue/interfaces/message-payload.interface';
+import { QUEUE_CONFIG } from '../src/api/queue/config/queue.config';
 
 describe('Queue Integration Tests (e2e)', () => {
   let app: INestApplication;
@@ -16,6 +16,12 @@ describe('Queue Integration Tests (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Configure global prefix to match production
+    app.setGlobalPrefix('api', {
+      exclude: ['/'],
+    });
+
     app.enableShutdownHooks();
     await app.init();
 
@@ -58,7 +64,7 @@ describe('Queue Integration Tests (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/admin/queue/message')
+        .post('/api/queue/message')
         .send(message)
         .expect(201);
 
@@ -68,7 +74,7 @@ describe('Queue Integration Tests (e2e)', () => {
 
     it('should retrieve queue stats', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/queue/stats')
+        .get('/api/admin/queue/stats')
         .expect(200);
 
       expect(response.body).toHaveProperty('mainQueue');
@@ -81,7 +87,7 @@ describe('Queue Integration Tests (e2e)', () => {
 
     it('should retrieve queue jobs', async () => {
       const response = await request(app.getHttpServer())
-        .get('/admin/queue/jobs?state=waiting&start=0&end=10')
+        .get('/api/admin/queue/jobs?state=waiting&start=0&end=10')
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
