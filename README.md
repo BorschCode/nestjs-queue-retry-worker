@@ -43,15 +43,15 @@ docker compose logs -f app
 docker compose down
 ```
 
-The application will be available at: **http://localhost:3000**
+The application will be available at: **http://localhost:3011**
 
 ### API Endpoints
 
-- `POST /admin/queue/message` - Add a message to the queue
-- `GET /admin/queue/stats` - Get queue statistics
-- `GET /admin/queue/jobs` - List jobs by state
-- `GET /admin/queue/dead-letter` - List dead-letter queue jobs
-- `POST /admin/queue/requeue/:jobId` - Requeue a failed message
+- `POST /api/admin/queue/message` - Add a message to the queue
+- `GET /api/admin/queue/stats` - Get queue statistics
+- `GET /api/admin/queue/jobs` - List jobs by state
+- `GET /api/admin/queue/dead-letter` - List dead-letter queue jobs
+- `POST /api/admin/queue/requeue/:jobId` - Requeue a failed message
 
 See [API Documentation](docs/API_DOCUMENTATION.md) for detailed endpoint information.
 
@@ -187,7 +187,7 @@ SMTP_PORT=1025
 ### Send HTTP Webhook Message
 
 ```bash
-curl -X POST http://localhost:3000/admin/queue/message \
+curl -X POST http://localhost:3011/api/admin/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "msg-001",
@@ -203,7 +203,7 @@ curl -X POST http://localhost:3000/admin/queue/message \
 ### Send Email Message
 
 ```bash
-curl -X POST http://localhost:3000/admin/queue/message \
+curl -X POST http://localhost:3011/api/admin/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "msg-002",
@@ -223,13 +223,13 @@ View emails at: **http://localhost:8025** (Mailpit web UI)
 ### Check Queue Statistics
 
 ```bash
-curl http://localhost:3000/admin/queue/stats
+curl http://localhost:3011/api/admin/queue/stats
 ```
 
 ### View Failed Jobs
 
 ```bash
-curl "http://localhost:3000/admin/queue/jobs?state=failed"
+curl "http://localhost:3011/api/admin/queue/jobs?state=failed"
 ```
 
 ---
@@ -270,7 +270,7 @@ Example:
 
 | Service | Image | Port | Description |
 |---------|-------|------|-------------|
-| app | nestjs-app | 3000 | Main application |
+| app | nestjs-app | 3011 | Main application |
 | redis | redis:7-alpine | 6379 | Queue storage |
 | postgres | postgres:15 | 5432 | Database (future use) |
 | mailpit | axllent/mailpit | 8025 (web), 1025 (smtp) | Email testing |

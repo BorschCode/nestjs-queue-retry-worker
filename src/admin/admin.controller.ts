@@ -7,18 +7,60 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { MessageQueueService } from '../queue/services/message-queue.service';
 
+@ApiTags('admin')
 @Controller('admin/queue')
 export class AdminController {
   constructor(private readonly messageQueueService: MessageQueueService) {}
 
   @Get('stats')
+  @ApiOperation({ summary: 'Get queue statistics' })
+  @ApiResponse({
+    status: 200,
+    description: 'Queue statistics retrieved successfully',
+    schema: {
+      example: {
+        waiting: 5,
+        active: 2,
+        completed: 100,
+        failed: 3,
+        delayed: 1,
+      },
+    },
+  })
   async getQueueStats() {
     return this.messageQueueService.getQueueStats();
   }
 
   @Get('jobs')
+  @ApiOperation({ summary: 'Get jobs by state' })
+  @ApiQuery({
+    name: 'state',
+    enum: ['waiting', 'active', 'completed', 'failed', 'delayed'],
+    required: false,
+    description: 'Job state to filter by',
+  })
+  @ApiQuery({ name: 'start', required: false, description: 'Start index for pagination', example: 0 })
+  @ApiQuery({ name: 'end', required: false, description: 'End index for pagination', example: 10 })
+  @ApiResponse({
+    status: 200,
+    description: 'Jobs retrieved successfully',
+    schema: {
+      example: [
+        {
+          id: '12345',
+          name: 'processMessage',
+          data: { message: 'Hello' },
+          attemptsMade: 1,
+          processedOn: 1234567890,
+          finishedOn: 1234567900,
+          failedReason: null,
+        },
+      ],
+    },
+  })
   async getJobs(
     @Query('state') state: 'waiting' | 'active' | 'completed' | 'failed' | 'delayed' = 'waiting',
     @Query('start') start = 0,
@@ -37,6 +79,24 @@ export class AdminController {
   }
 
   @Get('dead-letter')
+  @ApiOperation({ summary: 'Get jobs in the dead letter queue' })
+  @ApiQuery({ name: 'start', required: false, description: 'Start index for pagination', example: 0 })
+  @ApiQuery({ name: 'end', required: false, description: 'End index for pagination', example: 10 })
+  @ApiResponse({
+    status: 200,
+    description: 'Dead letter jobs retrieved successfully',
+    schema: {
+      example: [
+        {
+          id: '12345',
+          name: 'processMessage',
+          data: { message: 'Failed message' },
+          attemptsMade: 5,
+          timestamp: 1234567890,
+        },
+      ],
+    },
+  })
   async getDeadLetterJobs(
     @Query('start') start = 0,
     @Query('end') end = 10,
@@ -52,6 +112,28 @@ export class AdminController {
   }
 
   @Get('jobs/:jobId')
+  @ApiOperation({ summary: 'Get job details by ID' })
+  @ApiParam({ name: 'jobId', description: 'Job ID', example: '12345' })
+  @ApiResponse({
+    status: 200,
+    description: 'Job details retrieved successfully',
+    schema: {
+      example: {
+        id: '12345',
+        name: 'processMessage',
+        data: { message: 'Hello' },
+        attemptsMade: 2,
+        processedOn: 1234567890,
+        finishedOn: 1234567900,
+        failedReason: 'Network error',
+        stacktrace: ['Error: Network error', '  at processMessage...'],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job not found',
+  })
   async getJobById(@Param('jobId') jobId: string) {
     const job = await this.messageQueueService.getJobById(jobId);
 
@@ -72,6 +154,22 @@ export class AdminController {
   }
 
   @Post('requeue/:jobId')
+  @ApiOperation({ summary: 'Requeue a job from the dead letter queue' })
+  @ApiParam({ name: 'jobId', description: 'Job ID to requeue', example: '12345' })
+  @ApiResponse({
+    status: 201,
+    description: 'Job requeued successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Job 12345 requeued successfully',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Failed to requeue job',
+  })
   async requeueFromDeadLetter(@Param('jobId') jobId: string) {
     try {
       await this.messageQueueService.requeueFromDeadLetter(jobId);

@@ -5,15 +5,33 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { MessageQueueService } from './services/message-queue.service';
-import { MessagePayload } from './interfaces';
+import { MessagePayloadDto } from './dto/message-payload.dto';
 
+@ApiTags('queue')
 @Controller('queue')
 export class QueueController {
   constructor(private readonly messageQueueService: MessageQueueService) {}
 
   @Post('message')
-  async addMessage(@Body() message: MessagePayload) {
+  @ApiOperation({ summary: 'Add a message to the queue' })
+  @ApiResponse({
+    status: 201,
+    description: 'Message successfully added to queue',
+    schema: {
+      example: {
+        success: true,
+        jobId: '12345',
+        message: 'Message added to queue successfully',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid message format',
+  })
+  async addMessage(@Body() message: MessagePayloadDto) {
     try {
       const job = await this.messageQueueService.addMessage(message);
       return {
