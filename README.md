@@ -30,6 +30,17 @@ A production-ready NestJS-based message processing service with automatic retry 
 - Docker and Docker Compose
 - Node.js 18+ (for local development)
 
+### Environment Setup
+
+**Important**: Copy the environment file before starting:
+
+```bash
+# Copy environment configuration
+cp .env.example .env
+```
+
+> **Note**: If you don't modify the `.env` file, all URLs and ports mentioned in this README will work as-is.
+
 ### Start the Service
 
 ```bash
@@ -43,27 +54,27 @@ docker compose logs -f app
 docker compose down
 ```
 
-The application will be available at: **http://localhost:3011**
+The application will be available at: **http://localhost:3000**
 
 ### API Documentation
 
 Interactive API documentation is available via Swagger/OpenAPI at:
-**http://localhost:3011/api/docs**
+**http://localhost:3000/api/docs**
 
 **OpenAPI Specification:**
-- **JSON Format**: http://localhost:3011/api/docs-json
-- **Swagger UI**: http://localhost:3011/api/docs
-- **GitHub Pages**: [Static API Documentation](https://username.github.io/nestjs-queue-retry-worker/swagger.html)
+- **JSON Format**: http://localhost:3000/api/docs-json
+- **Swagger UI**: http://localhost:3000/api/docs
+- **GitHub Pages**: [Static API Documentation](https://borschcode.github.io/nestjs-queue-retry-worker/swagger.html)
 
 **Quick Reference:**
 - **Queue Operations**: `POST /api/queue/message`
 - **Admin Operations**: `GET /api/admin/queue/*`
 
-See the [Swagger UI](http://localhost:3011/api/docs) for complete endpoint details, request/response schemas, and interactive testing.
+See the [Swagger UI](http://localhost:3000/api/docs) for complete endpoint details, request/response schemas, and interactive testing.
 
 ![Home Page](docs/home-page.png)
 
-**Note**: Replace `username` in the GitHub Pages URL with your actual GitHub username to access the static documentation.
+**Live Demo**: [https://borschcode.github.io/nestjs-queue-retry-worker/](https://borschcode.github.io/nestjs-queue-retry-worker/)
 
 ---
 
@@ -207,15 +218,17 @@ docker compose exec app npm run build
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Copy the example environment file and customize as needed:
 
-```env
-PORT=3000
-REDIS_HOST=redis
-REDIS_PORT=6379
-SMTP_HOST=mailpit
-SMTP_PORT=1025
+```bash
+cp .env.example .env
 ```
+
+Default ports when using `.env.example`:
+- **App**: http://localhost:3000
+- **Mailpit Web UI**: http://localhost:8025
+- **PostgreSQL**: localhost:5432
+- **Redis**: localhost:6378
 
 ---
 
@@ -224,7 +237,7 @@ SMTP_PORT=1025
 ### Send HTTP Webhook Message
 
 ```bash
-curl -X POST http://localhost:3011/api/queue/message \
+curl -X POST http://localhost:3000/api/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "msg-001",
@@ -240,7 +253,7 @@ curl -X POST http://localhost:3011/api/queue/message \
 ### Send Email Message
 
 ```bash
-curl -X POST http://localhost:3011/api/queue/message \
+curl -X POST http://localhost:3000/api/queue/message \
   -H "Content-Type: application/json" \
   -d '{
     "id": "msg-002",
@@ -260,13 +273,13 @@ View emails at: **http://localhost:8025** (Mailpit web UI)
 ### Check Queue Statistics
 
 ```bash
-curl http://localhost:3011/api/admin/queue/stats
+curl http://localhost:3000/api/admin/queue/stats
 ```
 
 ### View Failed Jobs
 
 ```bash
-curl "http://localhost:3011/api/admin/queue/jobs?state=failed"
+curl "http://localhost:3000/api/admin/queue/jobs?state=failed"
 ```
 
 ---
@@ -307,7 +320,7 @@ Example:
 
 | Service | Image | Port | Description |
 |---------|-------|------|-------------|
-| app | nestjs-app | 3011 | Main application |
+| app | nestjs-app | 3000 | Main application |
 | redis | redis:7-alpine | 6379 | Queue storage |
 | postgres | postgres:15 | 5432 | Database (future use) |
 | mailpit | axllent/mailpit | 8025 (web), 1025 (smtp) | Email testing |
