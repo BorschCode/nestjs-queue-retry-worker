@@ -2,7 +2,7 @@ import { Injectable, Inject, LoggerService } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, Job } from 'bullmq';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { QUEUE_CONFIG, getBackoffDelay } from '../config/queue.config';
+import { QUEUE_CONFIG } from '../config/queue.config';
 import { MessagePayload } from '../interfaces/message-payload.interface';
 import { JobData, JobType } from '../interfaces/job-data.interface';
 
@@ -75,7 +75,12 @@ export class MessageQueueService {
   }
 
   async getJobs(
-    state: 'waiting' | 'active' | 'completed' | 'failed' | 'delayed' = 'waiting',
+    state:
+      | 'waiting'
+      | 'active'
+      | 'completed'
+      | 'failed'
+      | 'delayed' = 'waiting',
     start = 0,
     end = 10,
   ): Promise<Job[]> {

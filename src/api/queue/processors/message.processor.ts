@@ -61,7 +61,10 @@ export class MessageProcessor extends WorkerHost {
     }
   }
 
-  private async scheduleRetry(job: Job<JobData>, errorMessage: string): Promise<void> {
+  private async scheduleRetry(
+    job: Job<JobData>,
+    errorMessage: string,
+  ): Promise<void> {
     const nextAttempt = job.data.attemptCount + 1;
     const delay = getBackoffDelay(nextAttempt);
 
@@ -80,7 +83,10 @@ export class MessageProcessor extends WorkerHost {
     // BullMQ will automatically retry based on job configuration
   }
 
-  private async moveToDeadLetter(job: Job<JobData>, errorMessage: string): Promise<void> {
+  private async moveToDeadLetter(
+    job: Job<JobData>,
+    errorMessage: string,
+  ): Promise<void> {
     this.logger.error(
       `Moving message ${job.data.message.id} to dead-letter queue after ${QUEUE_CONFIG.MAX_RETRY_ATTEMPTS} failed attempts`,
       '',

@@ -27,9 +27,8 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
     app.enableShutdownHooks();
     await app.init();
 
-    messageQueueService = moduleFixture.get<MessageQueueService>(
-      MessageQueueService,
-    );
+    messageQueueService =
+      moduleFixture.get<MessageQueueService>(MessageQueueService);
     deliveryChannelFactory = moduleFixture.get<DeliveryChannelFactory>(
       DeliveryChannelFactory,
     );
@@ -80,7 +79,7 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const message: MessagePayload = {
-        id: `dead-letter-test-${Date.now()}`,  // Unique ID
+        id: `dead-letter-test-${Date.now()}`, // Unique ID
         channel: 'http',
         destination: 'https://invalid-endpoint.example.com/webhook',
         data: { test: 'data' },
@@ -104,7 +103,7 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
       // Accept either mock error or real HTTP error (both indicate retry happened)
       expect(
         movedJob?.data.lastError?.includes('Simulated delivery failure') ||
-        movedJob?.data.lastError?.includes('ENOTFOUND')
+          movedJob?.data.lastError?.includes('ENOTFOUND'),
       ).toBe(true);
     }, 60000);
 

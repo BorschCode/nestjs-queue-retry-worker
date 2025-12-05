@@ -4,7 +4,6 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { MessageQueueService } from '../src/api/queue/services/message-queue.service';
 import { MessagePayload } from '../src/api/queue/interfaces/message-payload.interface';
-import { QUEUE_CONFIG } from '../src/api/queue/config/queue.config';
 
 describe('Queue Integration Tests (e2e)', () => {
   let app: INestApplication;
@@ -25,9 +24,8 @@ describe('Queue Integration Tests (e2e)', () => {
     app.enableShutdownHooks();
     await app.init();
 
-    messageQueueService = moduleFixture.get<MessageQueueService>(
-      MessageQueueService,
-    );
+    messageQueueService =
+      moduleFixture.get<MessageQueueService>(MessageQueueService);
 
     // Clean up queues before starting tests
     const mainQueue = messageQueueService['messageQueue'];
@@ -57,7 +55,7 @@ describe('Queue Integration Tests (e2e)', () => {
   describe('Message Queue Processing', () => {
     it('should add a message to the queue via API', async () => {
       const message: MessagePayload = {
-        id: `e2e-test-${Date.now()}`,  // Unique ID
+        id: `e2e-test-${Date.now()}`, // Unique ID
         channel: 'internal',
         destination: 'test-service',
         data: { test: 'data' },
@@ -97,7 +95,7 @@ describe('Queue Integration Tests (e2e)', () => {
   describe('Queue Service Direct Tests', () => {
     it('should process internal service message successfully', async () => {
       const message: MessagePayload = {
-        id: `direct-test-${Date.now()}`,  // Unique ID
+        id: `direct-test-${Date.now()}`, // Unique ID
         channel: 'internal',
         destination: 'test-service',
         data: { action: 'process' },

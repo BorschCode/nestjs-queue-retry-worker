@@ -42,20 +42,24 @@ describe('InternalServiceChannel', () => {
       await channel.deliver(mockMessage);
 
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining(`Processing internal service message ${mockMessage.id}`),
+        expect.stringContaining(
+          `Processing internal service message ${mockMessage.id}`,
+        ),
         'InternalServiceChannel',
       );
       expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining(`Message ${mockMessage.id} delivered successfully`),
+        expect.stringContaining(
+          `Message ${mockMessage.id} delivered successfully`,
+        ),
         'DeliveryChannel',
       );
     });
 
     it('should handle internal processing errors', async () => {
       // Mock processInternally to throw an error
-      jest.spyOn(channel as any, 'processInternally').mockRejectedValue(
-        new Error('Internal processing failed'),
-      );
+      jest
+        .spyOn(channel as any, 'processInternally')
+        .mockRejectedValue(new Error('Internal processing failed'));
 
       await expect(channel.deliver(mockMessage)).rejects.toThrow(
         'Internal processing failed',

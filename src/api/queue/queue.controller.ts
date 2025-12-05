@@ -17,7 +17,7 @@ export class QueueController {
   @Post('message')
   @ApiOperation({ summary: 'Add a message to the queue' })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'Message successfully added to queue',
     schema: {
       example: {
@@ -28,7 +28,7 @@ export class QueueController {
     },
   })
   @ApiResponse({
-    status: 400,
+    status: HttpStatus.BAD_REQUEST,
     description: 'Bad request - invalid message format',
   })
   async addMessage(@Body() message: MessagePayloadDto) {

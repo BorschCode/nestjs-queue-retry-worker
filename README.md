@@ -80,6 +80,78 @@ See the [Swagger UI](http://localhost:3000/api/docs) for complete endpoint detai
 
 ## Architecture Overview
 
+### ⚙️ Processing Rules
+
+#### 1. Message enters the primary queue
+When a message is received through the API, it is added to the `messages` queue.
+
+#### 2. Message processor picks up the job
+For each job, the processor performs the following steps:
+
+**Step A — Determine delivery channel**
+
+Based on the `channel` field, route the message to the appropriate delivery handler:
+- If `channel = "http"` → deliver via HTTP webhook (POST request)
+- If `channel = "internal"` → call an internal microservice (HTTP or RPC)
+- If `channel = "email"` → send an email through the configured mail provider
+- If the channel is unknown → fail immediately
+
+#### 3. Attempt delivery
+Each handler attempts to deliver the message using its channel:
+
+**HTTP Webhook Delivery**
+- Send POST {destination} with data
+- If response is not 2xx → delivery fails
+- Timeouts or exceptions also count as failures
+
+**Internal Service Delivery**
+- Use HTTP or RPC call to internal service
+- Retry on transport errors, 5xx responses
+
+**Email Delivery**
+- Send email using SMTP or email provider
+- If the provider returns an error → fail
+- If rate-limited → treat as temporary failure
+
+#### 4. Retry mechanism
+If delivery fails:
+- The job is retried automatically
+- Retries use exponential backoff (Example: 2s → 4s → 8s → 16s → 32s)
+- Maximum retry attempts: configurable (default: 5 attempts)
+- During each retry, the system logs the attempt number and error
+
+#### 5. Dead-Letter Queue (DLQ)
+If the job exhausts all retry attempts, the system:
+- Moves the message to a dead-letter queue
+- Triggers the DLQ handler
+
+#### 6. Dead-Letter Processing
+When a job reaches the DLQ:
+- Log the failure with message details
+- Notify the system (email, Slack, monitoring tool)
+- Store failed message for manual review
+- Provide an endpoint to requeue the message manually
+
+### 📦 Required Handlers
+
+**Primary Queue Processor**
+- Determines delivery channel
+- Executes channel-specific handler
+- Throws errors on failure
+- Supports retry and exponential backoff
+- Sends exhausted jobs to DLQ
+
+**Channel Handlers**
+- HTTP Handler
+- Internal Service Handler
+- Email Handler
+
+**Dead-Letter Queue Processor**
+- Logs failed messages
+- Sends alerts
+- Saves message for operators
+- Allows manual recovery/replay later
+
 ### Delivery Channels
 
 The service supports three types of delivery channels:

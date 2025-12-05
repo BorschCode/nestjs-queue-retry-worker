@@ -1,16 +1,46 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AppService {
+  constructor(private readonly configService: ConfigService) {}
+
   getHomePageData() {
+    const port = this.configService.get<number>('PORT', 3011);
+    const redisPort = this.configService.get<number>('REDIS_PORT', 6379);
+    const postgresPort = this.configService.get<number>('POSTGRES_PORT', 5432);
+    const mailpitWebPort = this.configService.get<number>(
+      'MAILPIT_WEB_PORT',
+      8025,
+    );
+    const mailpitSmtpPort = this.configService.get<number>(
+      'MAILPIT_SMTP_PORT',
+      1025,
+    );
+
     return {
       title: 'Message Queue Processing Service',
-      description: 'Production-ready NestJS-based message processing with automatic retry logic and dead-letter queue handling',
+      description:
+        'Production-ready NestJS-based message processing with automatic retry logic and dead-letter queue handling',
+
+      configNotice: {
+        message:
+          'All service ports and configurations are set up in the .env file',
+        configPath: '.env',
+        variables: [
+          `PORT=${port}`,
+          `REDIS_PORT=${redisPort}`,
+          `POSTGRES_PORT=${postgresPort}`,
+          `MAILPIT_WEB_PORT=${mailpitWebPort}`,
+          `MAILPIT_SMTP_PORT=${mailpitSmtpPort}`,
+        ],
+      },
 
       links: [
         {
           title: 'API Documentation',
-          description: 'Interactive Swagger/OpenAPI documentation with endpoint testing',
+          description:
+            'Interactive Swagger/OpenAPI documentation with endpoint testing',
           url: '/api/docs',
           external: false,
         },
@@ -29,7 +59,7 @@ export class AppService {
         {
           title: 'Mailpit (Email Testing)',
           description: 'View test emails sent by the service',
-          url: 'http://localhost:8025',
+          url: `http://localhost:${mailpitWebPort}`,
           external: true,
         },
       ],
@@ -41,7 +71,8 @@ export class AppService {
         },
         {
           title: 'Automatic Retry Logic',
-          description: 'Exponential backoff with configurable max attempts (5 retries)',
+          description:
+            'Exponential backoff with configurable max attempts (5 retries)',
         },
         {
           title: 'Dead-Letter Queue',
@@ -49,7 +80,8 @@ export class AppService {
         },
         {
           title: 'Admin API',
-          description: 'Comprehensive endpoints for queue management and monitoring',
+          description:
+            'Comprehensive endpoints for queue management and monitoring',
         },
         {
           title: 'Structured Logging',
@@ -57,7 +89,8 @@ export class AppService {
         },
         {
           title: 'Docker Support',
-          description: 'Full Docker Compose setup with Redis, PostgreSQL, and Mailpit',
+          description:
+            'Full Docker Compose setup with Redis, PostgreSQL, and Mailpit',
         },
       ],
 
@@ -70,7 +103,8 @@ export class AppService {
         {
           method: 'get',
           path: '/api/admin/queue/stats',
-          description: 'Get queue statistics (waiting, active, completed, failed, delayed)',
+          description:
+            'Get queue statistics (waiting, active, completed, failed, delayed)',
         },
         {
           method: 'get',
@@ -98,22 +132,22 @@ export class AppService {
         {
           name: 'Application',
           description: 'NestJS App',
-          port: ':3011',
+          port: `:${port}`,
         },
         {
           name: 'Redis',
           description: 'Queue Storage',
-          port: ':6379',
+          port: `:${redisPort}`,
         },
         {
           name: 'PostgreSQL',
           description: 'Database',
-          port: ':5432',
+          port: `:${postgresPort}`,
         },
         {
           name: 'Mailpit',
           description: 'Email Testing',
-          port: ':8025 / :1025',
+          port: `:${mailpitWebPort} / :${mailpitSmtpPort}`,
         },
       ],
 

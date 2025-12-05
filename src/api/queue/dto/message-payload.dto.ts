@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEnum, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsObject,
+} from 'class-validator';
+import { DeliveryChannel } from '../enums/delivery-channel.enum';
 
 export class MessagePayloadDto {
   @ApiProperty({
@@ -12,11 +19,11 @@ export class MessagePayloadDto {
 
   @ApiProperty({
     description: 'Delivery channel for the message',
-    enum: ['http', 'email', 'internal'],
-    example: 'http',
+    enum: DeliveryChannel,
+    example: DeliveryChannel.HTTP,
   })
-  @IsEnum(['http', 'email', 'internal'])
-  channel: 'http' | 'email' | 'internal';
+  @IsEnum(DeliveryChannel)
+  channel: DeliveryChannel;
 
   @ApiProperty({
     description: 'Destination URL, email address, or internal identifier',

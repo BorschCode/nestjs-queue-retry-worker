@@ -104,7 +104,9 @@ describe('MessageProcessor', () => {
     });
 
     it('should move to dead-letter queue after max attempts', async () => {
-      const job = createMockJob(QUEUE_CONFIG.MAX_RETRY_ATTEMPTS) as Job<JobData>;
+      const job = createMockJob(
+        QUEUE_CONFIG.MAX_RETRY_ATTEMPTS,
+      ) as Job<JobData>;
       const error = new Error('Final delivery failure');
 
       jest.spyOn(deliveryChannelFactory, 'deliver').mockRejectedValue(error);

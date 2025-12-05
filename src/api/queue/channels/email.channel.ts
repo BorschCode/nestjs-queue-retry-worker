@@ -30,8 +30,21 @@ export class EmailChannel extends BaseDeliveryChannel {
 
   async deliver(message: MessagePayload): Promise<void> {
     try {
+      const defaultFromAddress = this.configService.get(
+        'MAIL_FROM_ADDRESS',
+        'noreply@example.com',
+      );
+      const defaultFromName = this.configService.get(
+        'MAIL_FROM_NAME',
+        'Message Queue Service',
+      );
+
+      const fromAddress = message.data.from || defaultFromAddress;
+      const fromName = message.data.fromName || defaultFromName;
+      const from = `"${fromName}" <${fromAddress}>`;
+
       const mailOptions = {
-        from: message.data.from || 'noreply@example.com',
+        from: from,
         to: message.destination,
         subject: message.data.subject || 'Message Notification',
         text: message.data.text,

@@ -78,9 +78,7 @@ describe('EmailChannel', () => {
     it('should throw error on email delivery failure', async () => {
       const error = new Error('SMTP connection failed');
 
-      jest
-        .spyOn(channel['transporter'], 'sendMail')
-        .mockRejectedValue(error);
+      jest.spyOn(channel['transporter'], 'sendMail').mockRejectedValue(error);
 
       await expect(channel.deliver(mockMessage)).rejects.toThrow(
         'SMTP connection failed',
