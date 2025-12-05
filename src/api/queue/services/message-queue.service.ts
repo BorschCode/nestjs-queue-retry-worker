@@ -92,14 +92,34 @@ export class MessageQueueService {
   }
 
   async requeueFromDeadLetter(jobId: string): Promise<void> {
-    const job = await this.deadLetterQueue.getJob(jobId);
+    // First, try to find the job in the dead-letter queue
+    let job = await this.deadLetterQueue.getJob(jobId);
+    let source = 'dead-letter queue';
+
+    // If not found in DLQ, check the main queue's failed jobs
+    if (!job) {
+      job = await this.messageQueue.getJob(jobId);
+      source = 'failed jobs';
+
+      // Verify it's actually a failed job
+      if (job) {
+        const state = await job.getState();
+        if (state !== 'failed') {
+          throw new Error(
+            `Job ${jobId} is in state '${state}', can only requeue failed jobs`,
+          );
+        }
+      }
+    }
 
     if (!job) {
-      throw new Error(`Job ${jobId} not found in dead-letter queue`);
+      throw new Error(
+        `Job ${jobId} not found in dead-letter queue or failed jobs`,
+      );
     }
 
     this.logger.log(
-      `Requeuing message ${job.data.message.id} from dead-letter queue`,
+      `Requeuing message ${job.data.message.id} from ${source}`,
       'MessageQueueService',
     );
 

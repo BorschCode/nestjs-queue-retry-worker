@@ -183,10 +183,14 @@ export class AdminController {
   }
 
   @Post('requeue/:jobId')
-  @ApiOperation({ summary: 'Requeue a job from the dead letter queue' })
+  @ApiOperation({
+    summary: 'Requeue a failed or dead-letter job',
+    description:
+      'Requeue a job from either the main queue failed jobs or the dead-letter queue. The job will be reset and added back to the main queue with a fresh attempt count.',
+  })
   @ApiParam({
     name: 'jobId',
-    description: 'Job ID to requeue',
+    description: 'Job ID to requeue (from failed jobs or dead-letter queue)',
     example: '12345',
   })
   @ApiResponse({
@@ -201,7 +205,8 @@ export class AdminController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Failed to requeue job',
+    description:
+      'Failed to requeue job - Job not found, not in failed state, or other error',
   })
   async requeueFromDeadLetter(@Param('jobId') jobId: string) {
     try {
