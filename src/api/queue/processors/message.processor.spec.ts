@@ -1,12 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { getQueueToken } from '@nestjs/bullmq';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Job, Queue } from 'bullmq';
 import { MessageProcessor } from './message.processor';
 import { DeliveryChannelFactory } from '../channels/delivery-channel.factory';
+import { EmailChannel } from '../channels/email.channel';
 import { QUEUE_CONFIG } from '../config/queue.config';
 import { JobData, JobType } from '../interfaces/job-data.interface';
 import { MessagePayload } from '../interfaces/message-payload.interface';
+import { DeliveryChannel } from '../enums/delivery-channel.enum';
 
 describe('MessageProcessor', () => {
   let processor: MessageProcessor;
@@ -18,13 +21,26 @@ describe('MessageProcessor', () => {
     logger = {
       log: jest.fn(),
       error: jest.fn(),
+      warn: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MessageProcessor,
         {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string, defaultValue?: any) => defaultValue),
+          },
+        },
+        {
           provide: DeliveryChannelFactory,
+          useValue: {
+            deliver: jest.fn(),
+          },
+        },
+        {
+          provide: EmailChannel,
           useValue: {
             deliver: jest.fn(),
           },
@@ -58,7 +74,7 @@ describe('MessageProcessor', () => {
   describe('process', () => {
     const mockMessage: MessagePayload = {
       id: 'test-message-1',
-      channel: 'http',
+      channel: DeliveryChannel.HTTP,
       destination: 'https://example.com/webhook',
       data: { test: 'data' },
     };
@@ -152,7 +168,7 @@ describe('MessageProcessor', () => {
   describe('event handlers', () => {
     const mockMessage: MessagePayload = {
       id: 'test-message-1',
-      channel: 'http',
+      channel: DeliveryChannel.HTTP,
       destination: 'https://example.com/webhook',
       data: { test: 'data' },
     };

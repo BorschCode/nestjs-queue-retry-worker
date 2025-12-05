@@ -1,10 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { MessageQueueService } from '../src/api/queue/services/message-queue.service';
 import { MessagePayload } from '../src/api/queue/interfaces/message-payload.interface';
+import { DeliveryChannel } from '../src/api/queue/enums/delivery-channel.enum';
 
+/**
+ * Integration Tests (E2E)
+ *
+ * These tests use the full application stack with real Redis connection.
+ * Redis is provided via docker-compose (acting as testcontainers).
+ *
+ * To run:
+ * 1. Start services: docker compose up -d
+ * 2. Run tests: npm test or docker compose exec app npm test
+ *
+ * Redis is automatically cleaned before and after tests.
+ */
 describe('Queue Integration Tests (e2e)', () => {
   let app: INestApplication;
   let messageQueueService: MessageQueueService;
@@ -15,6 +28,15 @@ describe('Queue Integration Tests (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Enable global validation pipe
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
 
     // Configure global prefix to match production
     app.setGlobalPrefix('api', {
@@ -56,7 +78,7 @@ describe('Queue Integration Tests (e2e)', () => {
     it('should add a message to the queue via API', async () => {
       const message: MessagePayload = {
         id: `e2e-test-${Date.now()}`, // Unique ID
-        channel: 'internal',
+        channel: DeliveryChannel.INTERNAL,
         destination: 'test-service',
         data: { test: 'data' },
       };
@@ -96,7 +118,7 @@ describe('Queue Integration Tests (e2e)', () => {
     it('should process internal service message successfully', async () => {
       const message: MessagePayload = {
         id: `direct-test-${Date.now()}`, // Unique ID
-        channel: 'internal',
+        channel: DeliveryChannel.INTERNAL,
         destination: 'test-service',
         data: { action: 'process' },
       };

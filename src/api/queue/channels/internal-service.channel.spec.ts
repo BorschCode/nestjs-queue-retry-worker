@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { InternalServiceChannel } from './internal-service.channel';
 import { MessagePayload } from '../interfaces/message-payload.interface';
+import { DeliveryChannel } from '../enums/delivery-channel.enum';
 
 describe('InternalServiceChannel', () => {
   let channel: InternalServiceChannel;
@@ -33,7 +34,7 @@ describe('InternalServiceChannel', () => {
   describe('deliver', () => {
     const mockMessage: MessagePayload = {
       id: 'test-message-1',
-      channel: 'internal',
+      channel: DeliveryChannel.INTERNAL,
       destination: 'internal-service',
       data: { action: 'process', payload: { test: 'data' } },
     };
