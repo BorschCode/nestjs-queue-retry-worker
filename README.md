@@ -64,7 +64,7 @@ Interactive API documentation is available via Swagger/OpenAPI at:
 **OpenAPI Specification:**
 - **JSON Format**: http://localhost:3000/api/docs-json
 - **Swagger UI**: http://localhost:3000/api/docs
-- **GitHub Pages**: [Static API Documentation](https://borschcode.github.io/nestjs-queue-retry-worker/swagger.html)
+- **GitHub Pages**: [Static API Documentation](https://borschcode.github.io/nestjs-queue-retry-worker)
 
 **Quick Reference:**
 - **Queue Operations**: `POST /api/queue/message`
