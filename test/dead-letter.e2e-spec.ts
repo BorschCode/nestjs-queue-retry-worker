@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { MessageQueueService } from '../src/api/queue/services/message-queue.service';
 import { DeliveryChannelFactory } from '../src/api/queue/channels/delivery-channel.factory';
 import { MessagePayload } from '../src/api/queue/interfaces/message-payload.interface';
+import { DeliveryChannel } from '../src/api/queue/enums/delivery-channel.enum';
 import { QUEUE_CONFIG } from '../src/api/queue/config/queue.config';
 
 describe('Dead-Letter Queue Integration Tests (e2e)', () => {
@@ -80,7 +81,7 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
 
       const message: MessagePayload = {
         id: `dead-letter-test-${Date.now()}`, // Unique ID
-        channel: 'http',
+        channel: DeliveryChannel.HTTP,
         destination: 'https://invalid-endpoint.example.com/webhook',
         data: { test: 'data' },
       };
