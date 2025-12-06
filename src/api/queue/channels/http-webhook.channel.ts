@@ -18,17 +18,21 @@ export class HttpWebhookChannel extends BaseDeliveryChannel {
   async deliver(message: MessagePayload): Promise<void> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post(message.destination, {
-          id: message.id,
-          data: message.data,
-          metadata: message.metadata,
-        }, {
-          timeout: 10000, // 10 second timeout
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Message-Id': message.id,
+        this.httpService.post(
+          message.destination,
+          {
+            id: message.id,
+            data: message.data,
+            metadata: message.metadata,
           },
-        }),
+          {
+            timeout: 10000, // 10 second timeout
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Message-Id': message.id,
+            },
+          },
+        ),
       );
 
       if (response.status >= 200 && response.status < 300) {

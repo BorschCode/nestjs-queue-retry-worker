@@ -4,6 +4,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { of, throwError } from 'rxjs';
 import { HttpWebhookChannel } from './http-webhook.channel';
 import { MessagePayload } from '../interfaces/message-payload.interface';
+import { DeliveryChannel } from '../enums/delivery-channel.enum';
 
 describe('HttpWebhookChannel', () => {
   let channel: HttpWebhookChannel;
@@ -43,7 +44,7 @@ describe('HttpWebhookChannel', () => {
   describe('deliver', () => {
     const mockMessage: MessagePayload = {
       id: 'test-message-1',
-      channel: 'http',
+      channel: DeliveryChannel.HTTP,
       destination: 'https://example.com/webhook',
       data: { test: 'data' },
       metadata: { source: 'test' },

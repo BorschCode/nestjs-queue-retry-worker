@@ -7,7 +7,13 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiParam,
+} from '@nestjs/swagger';
 import { MessageQueueService } from '../queue/services/message-queue.service';
 
 @ApiTags('admin')
@@ -18,7 +24,7 @@ export class AdminController {
   @Get('stats')
   @ApiOperation({ summary: 'Get queue statistics' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'Queue statistics retrieved successfully',
     schema: {
       example: {
@@ -42,10 +48,20 @@ export class AdminController {
     required: false,
     description: 'Job state to filter by',
   })
-  @ApiQuery({ name: 'start', required: false, description: 'Start index for pagination', example: 0 })
-  @ApiQuery({ name: 'end', required: false, description: 'End index for pagination', example: 10 })
+  @ApiQuery({
+    name: 'start',
+    required: false,
+    description: 'Start index for pagination',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'end',
+    required: false,
+    description: 'End index for pagination',
+    example: 10,
+  })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'Jobs retrieved successfully',
     schema: {
       example: [
@@ -62,7 +78,13 @@ export class AdminController {
     },
   })
   async getJobs(
-    @Query('state') state: 'waiting' | 'active' | 'completed' | 'failed' | 'delayed' = 'waiting',
+    @Query('state')
+    state:
+      | 'waiting'
+      | 'active'
+      | 'completed'
+      | 'failed'
+      | 'delayed' = 'waiting',
     @Query('start') start = 0,
     @Query('end') end = 10,
   ) {
@@ -80,10 +102,20 @@ export class AdminController {
 
   @Get('dead-letter')
   @ApiOperation({ summary: 'Get jobs in the dead letter queue' })
-  @ApiQuery({ name: 'start', required: false, description: 'Start index for pagination', example: 0 })
-  @ApiQuery({ name: 'end', required: false, description: 'End index for pagination', example: 10 })
+  @ApiQuery({
+    name: 'start',
+    required: false,
+    description: 'Start index for pagination',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'end',
+    required: false,
+    description: 'End index for pagination',
+    example: 10,
+  })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'Dead letter jobs retrieved successfully',
     schema: {
       example: [
@@ -97,10 +129,7 @@ export class AdminController {
       ],
     },
   })
-  async getDeadLetterJobs(
-    @Query('start') start = 0,
-    @Query('end') end = 10,
-  ) {
+  async getDeadLetterJobs(@Query('start') start = 0, @Query('end') end = 10) {
     const jobs = await this.messageQueueService.getDeadLetterJobs(start, end);
     return jobs.map((job) => ({
       id: job.id,
@@ -115,7 +144,7 @@ export class AdminController {
   @ApiOperation({ summary: 'Get job details by ID' })
   @ApiParam({ name: 'jobId', description: 'Job ID', example: '12345' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'Job details retrieved successfully',
     schema: {
       example: {
@@ -131,7 +160,7 @@ export class AdminController {
     },
   })
   @ApiResponse({
-    status: 404,
+    status: HttpStatus.NOT_FOUND,
     description: 'Job not found',
   })
   async getJobById(@Param('jobId') jobId: string) {
@@ -154,10 +183,18 @@ export class AdminController {
   }
 
   @Post('requeue/:jobId')
-  @ApiOperation({ summary: 'Requeue a job from the dead letter queue' })
-  @ApiParam({ name: 'jobId', description: 'Job ID to requeue', example: '12345' })
+  @ApiOperation({
+    summary: 'Requeue a failed or dead-letter job',
+    description:
+      'Requeue a job from either the main queue failed jobs or the dead-letter queue. The job will be reset and added back to the main queue with a fresh attempt count.',
+  })
+  @ApiParam({
+    name: 'jobId',
+    description: 'Job ID to requeue (from failed jobs or dead-letter queue)',
+    example: '12345',
+  })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'Job requeued successfully',
     schema: {
       example: {
@@ -167,8 +204,9 @@ export class AdminController {
     },
   })
   @ApiResponse({
-    status: 400,
-    description: 'Failed to requeue job',
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Failed to requeue job - Job not found, not in failed state, or other error',
   })
   async requeueFromDeadLetter(@Param('jobId') jobId: string) {
     try {

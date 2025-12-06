@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { MessageQueueService } from '../src/api/queue/services/message-queue.service';
 import { DeliveryChannelFactory } from '../src/api/queue/channels/delivery-channel.factory';
 import { MessagePayload } from '../src/api/queue/interfaces/message-payload.interface';
+import { DeliveryChannel } from '../src/api/queue/enums/delivery-channel.enum';
 import { QUEUE_CONFIG } from '../src/api/queue/config/queue.config';
 
 describe('Dead-Letter Queue Integration Tests (e2e)', () => {
@@ -27,9 +28,8 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
     app.enableShutdownHooks();
     await app.init();
 
-    messageQueueService = moduleFixture.get<MessageQueueService>(
-      MessageQueueService,
-    );
+    messageQueueService =
+      moduleFixture.get<MessageQueueService>(MessageQueueService);
     deliveryChannelFactory = moduleFixture.get<DeliveryChannelFactory>(
       DeliveryChannelFactory,
     );
@@ -71,6 +71,9 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
     });
 
     it('should move message to dead-letter queue after max retries', async () => {
+      // NOTE: This test intentionally causes delivery failures to verify retry and dead-letter queue behavior.
+      // Error logs showing "Simulated delivery failure" are EXPECTED and indicate the test is working correctly.
+
       // Mock the delivery to always fail
       deliverSpy = jest
         .spyOn(deliveryChannelFactory, 'deliver')
@@ -80,8 +83,8 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const message: MessagePayload = {
-        id: `dead-letter-test-${Date.now()}`,  // Unique ID
-        channel: 'http',
+        id: `dead-letter-test-${Date.now()}`, // Unique ID
+        channel: DeliveryChannel.HTTP,
         destination: 'https://invalid-endpoint.example.com/webhook',
         data: { test: 'data' },
       };
@@ -104,7 +107,7 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
       // Accept either mock error or real HTTP error (both indicate retry happened)
       expect(
         movedJob?.data.lastError?.includes('Simulated delivery failure') ||
-        movedJob?.data.lastError?.includes('ENOTFOUND')
+          movedJob?.data.lastError?.includes('ENOTFOUND'),
       ).toBe(true);
     }, 60000);
 

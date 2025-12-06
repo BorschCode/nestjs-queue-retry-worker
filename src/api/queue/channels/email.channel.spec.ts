@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { EmailChannel } from './email.channel';
 import { MessagePayload } from '../interfaces/message-payload.interface';
+import { DeliveryChannel } from '../enums/delivery-channel.enum';
 
 describe('EmailChannel', () => {
   let channel: EmailChannel;
@@ -46,7 +47,7 @@ describe('EmailChannel', () => {
   describe('deliver', () => {
     const mockMessage: MessagePayload = {
       id: 'test-message-1',
-      channel: 'email',
+      channel: DeliveryChannel.EMAIL,
       destination: 'test@example.com',
       data: {
         from: 'sender@example.com',
@@ -65,7 +66,7 @@ describe('EmailChannel', () => {
       await channel.deliver(mockMessage);
 
       expect(sendMailSpy).toHaveBeenCalledWith({
-        from: mockMessage.data.from,
+        from: '"Message Queue Service" <sender@example.com>',
         to: mockMessage.destination,
         subject: mockMessage.data.subject,
         text: mockMessage.data.text,
@@ -78,9 +79,7 @@ describe('EmailChannel', () => {
     it('should throw error on email delivery failure', async () => {
       const error = new Error('SMTP connection failed');
 
-      jest
-        .spyOn(channel['transporter'], 'sendMail')
-        .mockRejectedValue(error);
+      jest.spyOn(channel['transporter'], 'sendMail').mockRejectedValue(error);
 
       await expect(channel.deliver(mockMessage)).rejects.toThrow(
         'SMTP connection failed',

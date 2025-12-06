@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DeliveryChannel } from '../interfaces/delivery-channel.interface';
+import { DeliveryChannel as IDeliveryChannel } from '../interfaces/delivery-channel.interface';
 import { MessagePayload } from '../interfaces/message-payload.interface';
+import { DeliveryChannel } from '../enums/delivery-channel.enum';
 import { HttpWebhookChannel } from './http-webhook.channel';
 import { EmailChannel } from './email.channel';
 import { InternalServiceChannel } from './internal-service.channel';
@@ -13,13 +14,13 @@ export class DeliveryChannelFactory {
     private readonly internalServiceChannel: InternalServiceChannel,
   ) {}
 
-  getChannel(channelType: string): DeliveryChannel {
+  getChannel(channelType: DeliveryChannel): IDeliveryChannel {
     switch (channelType) {
-      case 'http':
+      case DeliveryChannel.HTTP:
         return this.httpWebhookChannel;
-      case 'email':
+      case DeliveryChannel.EMAIL:
         return this.emailChannel;
-      case 'internal':
+      case DeliveryChannel.INTERNAL:
         return this.internalServiceChannel;
       default:
         throw new Error(`Unknown delivery channel type: ${channelType}`);

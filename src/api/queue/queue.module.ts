@@ -5,7 +5,6 @@ import { HttpModule } from '@nestjs/axios';
 import { QUEUE_CONFIG } from './config/queue.config';
 import { MessageQueueService } from './services/message-queue.service';
 import { MessageProcessor } from './processors/message.processor';
-import { DeadLetterProcessor } from './processors/dead-letter.processor';
 import { QueueController } from './queue.controller';
 import {
   HttpWebhookChannel,
@@ -41,7 +40,6 @@ import {
   providers: [
     MessageQueueService,
     MessageProcessor,
-    DeadLetterProcessor,
     HttpWebhookChannel,
     EmailChannel,
     InternalServiceChannel,
