@@ -71,6 +71,9 @@ describe('Dead-Letter Queue Integration Tests (e2e)', () => {
     });
 
     it('should move message to dead-letter queue after max retries', async () => {
+      // NOTE: This test intentionally causes delivery failures to verify retry and dead-letter queue behavior.
+      // Error logs showing "Simulated delivery failure" are EXPECTED and indicate the test is working correctly.
+
       // Mock the delivery to always fail
       deliverSpy = jest
         .spyOn(deliveryChannelFactory, 'deliver')
