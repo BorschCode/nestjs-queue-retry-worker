@@ -20,24 +20,25 @@
     "@nestjs/platform-express": "^11.1.12",
     "@nestjs/swagger": "^11.2.5",
     "@nestjs/typeorm": "^11.0.0",
-
     "axios": "^1.7.9",
     "bullmq": "^5.66.5",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "ioredis": "^5.3.2",
+    "nest-winston": "^1.10.2",
+    "nodemailer": "^8.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.0",
-
-    "@types/node": "^20.11.30",
     "@types/jest": "^29.5.14",
-
+    "@types/node": "^20.11.30",
+    "@types/nodemailer": "^7.0.9",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",
     "typescript": "^5.4.5"

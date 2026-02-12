@@ -6,12 +6,12 @@ services:
     ports:
       - "${PORT:-3000}:3000"
     environment:
-      - PORT=3000
+      - PORT=3012
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/nestjs_queue
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_PORT=6317
       - SMTP_HOST=mailpit
-      - SMTP_PORT=1025
+      - SMTP_PORT=1017
     depends_on:
       - postgres
       - redis
